@@ -14,3 +14,7 @@ class RecipeRead(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+class RecipeRecommendation(BaseModel):
+    recipe: RecipeRead | None = None
+    message: str | None = None

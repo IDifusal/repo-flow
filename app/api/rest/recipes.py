@@ -4,6 +4,9 @@ from app.db import get_session
 from app.schemas.recipe import RecipeCreate, RecipeRead
 from app.services.recipe_service import RecipeService
 
+from app.ai.client import get_ai_client
+from app.schemas.recipe import RecipeCreate, RecipeRead, RecipeRecommendation
+
 router = APIRouter(prefix="/recipes", tags=["recipes"])
 
 
@@ -30,3 +33,11 @@ def delete_recipe(recipe_id: int, session: Session = Depends(get_session)) -> No
     deleted = service.delete_recipe(recipe_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Recipe not found")
+
+@router.get("/recommendation", response_model=RecipeRecommendation)
+def recommend_recipe(session: Session = Depends(get_session)) -> RecipeRecommendation:
+    service = RecipeService(session, ai_client=get_ai_client())
+    recipe = service.recommend_recipe()
+    if recipe is None:
+        return RecipeRecommendation(message="No recipes yet. Create one to get recommendations.")
+    return RecipeRecommendation(recipe=RecipeRead.model_validate(recipe))
