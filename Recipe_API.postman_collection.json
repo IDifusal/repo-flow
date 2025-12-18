@@ -1,0 +1,290 @@
+{
+  "info": {
+    "_postman_id": "637c4714-82f2-47c3-a192-8c3386a14a81",
+    "name": "Recipe API (Flow RMS Assessment)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection to test REST and GraphQL endpoints for the Recipe API."
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /health/db",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health/db",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health",
+                "db"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "REST - Recipes",
+      "item": [
+        {
+          "name": "POST /recipes (create)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.test('Has id', function () {",
+                  "  pm.expect(json).to.have.property('id');",
+                  "});",
+                  "",
+                  "if (json && json.id) {",
+                  "  pm.collectionVariables.set('recipeId', String(json.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Pasta\",\n  \"description\": \"Quick pasta\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recipes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /recipes (list)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recipes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /recipes/:id (delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recipes/{{recipeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes",
+                "{{recipeId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /recipes/recommendation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recipes/recommendation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recipes",
+                "recommendation"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GraphQL",
+      "item": [
+        {
+          "name": "GraphQL - createRecipe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('No GraphQL errors', function () {",
+                  "  pm.expect(body.errors).to.be.undefined;",
+                  "});",
+                  "const created = body?.data?.createRecipe;",
+                  "if (created?.id) {",
+                  "  pm.collectionVariables.set('graphqlRecipeId', String(created.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation Create($title: String!, $description: String) { createRecipe(title: $title, description: $description) { id title description createdAt } }\",\n  \"variables\": {\n    \"title\": \"Cake\",\n    \"description\": \"Chocolate\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GraphQL - recipes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { recipes { id title description createdAt } }\",\n  \"variables\": {}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GraphQL - recommendRecipe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { recommendRecipe { id title description createdAt } }\",\n  \"variables\": {}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GraphQL - deleteRecipe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation Delete($id: Int!) { deleteRecipe(recipeId: $id) }\",\n  \"variables\": {\n    \"id\": \"{{graphqlRecipeId}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "recipeId",
+      "value": ""
+    },
+    {
+      "key": "graphqlRecipeId",
+      "value": ""
+    }
+  ]
+}
