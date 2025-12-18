@@ -1,5 +1,6 @@
 import strawberry
 from strawberry.fastapi import GraphQLRouter
+from strawberry.extensions import QueryDepthLimiter
 from sqlalchemy.orm import Session
 from app.db import get_session
 from app.services.recipe_service import RecipeService
@@ -57,5 +58,11 @@ class Mutation:
         return deleted
 
 
-schema = strawberry.Schema(query=Query, mutation=Mutation)
+schema = strawberry.Schema(
+    query=Query, 
+    mutation=Mutation,
+    extensions=[
+        QueryDepthLimiter(max_depth=10),
+    ]
+)
 graphql_router = GraphQLRouter(schema)

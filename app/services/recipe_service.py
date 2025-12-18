@@ -10,10 +10,20 @@ class RecipeService:
         self.ai_client = ai_client
 
     def create_recipe(self, title: str, description: str | None) -> Recipe:
+        # Sanitize and validate title
         title_clean = title.strip()
         if not title_clean:
             raise ValueError("title is required")
-        return self.repo.create(title=title_clean, description=description)
+        
+        # Sanitize description if provided
+        description_clean = None
+        if description:
+            description_clean = description.strip()
+            # Limit description length (additional validation beyond schema)
+            if len(description_clean) > 5000:
+                raise ValueError("description exceeds maximum length of 5000 characters")
+        
+        return self.repo.create(title=title_clean, description=description_clean)
 
     def list_recipes(self) -> list[Recipe]:
         return self.repo.list()
