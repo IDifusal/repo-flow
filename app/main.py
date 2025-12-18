@@ -6,9 +6,9 @@ from app.db import Base, engine, get_session
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from app.models.recipe import Recipe
     Base.metadata.create_all(bind=engine)
     yield
-
 
 app = FastAPI(title="Repo Flow Recipes API", version="0.1.0", lifespan=lifespan)
 
