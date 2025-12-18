@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 from sqlalchemy import text
 from app.db import Base, engine, get_session
-
+from app.api.rest.recipes import router as recipe_router 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -11,7 +11,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="Repo Flow Recipes API", version="0.1.0", lifespan=lifespan)
-
+app.include_router(recipe_router)
 
 @app.get("/health")
 def health_check() -> dict:
